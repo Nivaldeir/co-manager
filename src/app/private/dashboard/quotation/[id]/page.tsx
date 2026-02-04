@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@/src/shared/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
+import { Badge } from '@/src/shared/components/ui/badge'
 import { Workflow, ArrowLeft, Calendar, TrendingUp, Building2, Flag, ArrowDown } from 'lucide-react'
 
 export default function QuotationDetailPage({ params }: { params: { id: string } }) {

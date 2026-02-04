@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, EyeOff, Type, Languages, User, Bell } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { cn } from "@/src/shared/utils";
+import { cn } from "@/src/shared/lib/utils";
 import { Button } from "./ui";
 
 type AccountType = "pix" | "crypto";

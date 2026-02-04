@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "./context";
 import superjson from "superjson";
-import { Fetch } from "@/src/shared/utils/fetch";
+import { Fetch } from "@/src/shared/lib/utils/fetch";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,

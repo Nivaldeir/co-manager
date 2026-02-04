@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { Fetch } from "@/src/shared/utils/fetch";
+import { Fetch } from "@/src/shared/lib/utils/fetch";
 
 const fetch = new Fetch({ requireAuth: false });
 

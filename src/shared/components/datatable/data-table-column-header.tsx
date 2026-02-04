@@ -2,7 +2,7 @@
 
 import { Button } from "@/src/shared/components/global/ui/button";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { cn } from "@/src/shared/utils";
+import { cn } from "@/src/shared/lib/utils";
 
 interface type {
     getIsSorted: () => "asc" | "desc" | false

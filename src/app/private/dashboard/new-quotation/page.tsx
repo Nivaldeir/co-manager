@@ -3,14 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/src/shared/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
+import { Input } from '@/src/shared/components/ui/input'
+import { Label } from '@/src/shared/components/ui/label'
+import { Textarea } from '@/src/shared/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/shared/components/ui/select'
 import { Workflow, ArrowLeft, Plus, Trash2, ArrowRight } from 'lucide-react'
-import { FlowBuilder } from '@/components/flow-builder'
+import { FlowBuilder } from '@/src/shared/components/global/flow-builder'
 
 export default function NewQuotationPage() {
   const router = useRouter()

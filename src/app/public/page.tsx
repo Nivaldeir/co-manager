@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/src/shared/components/ui/button'
+import { Card, CardContent } from '@/src/shared/components/ui/card'
 import { CheckCircle, BarChart3, Workflow, Users, TrendingUp, Shield } from 'lucide-react'
 
 export default function LandingPage() {

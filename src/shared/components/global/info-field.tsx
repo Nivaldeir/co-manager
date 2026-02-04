@@ -1,4 +1,4 @@
-import { cn } from "../../utils";
+import { cn } from "../../lib/utils"; 
 import { useCopy } from "../../hook/use-copy";
 
 export const InfoField = ({

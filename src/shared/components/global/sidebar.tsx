@@ -17,7 +17,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { cn } from "@/src/shared/utils";
+import { cn } from "@/src/shared/lib/utils";
 
 interface SubItem {
   label: string;

@@ -3,18 +3,18 @@
 import React from "react"
 
 import { useState, useRef, useCallback } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/src/shared/components/ui/button'
+import { Card, CardContent } from '@/src/shared/components/ui/card'
+import { Input } from '@/src/shared/components/ui/input'
+import { Label } from '@/src/shared/components/ui/label'
+import { Textarea } from '@/src/shared/components/ui/textarea'
 import { 
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/src/shared/components/ui/dialog'
 import { 
   Plus, 
   Trash2, 

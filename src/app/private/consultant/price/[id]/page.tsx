@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+import { Button } from '@/src/shared/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
+import { Badge } from '@/src/shared/components/ui/badge'
+import { Textarea } from '@/src/shared/components/ui/textarea'
+import { Label } from '@/src/shared/components/ui/label'
 import { Workflow, ArrowLeft, Calendar, TrendingUp, Building2, Flag, ArrowDown, CheckCircle2, XCircle, Clock, MessageSquare } from 'lucide-react'
 import {
   Select,
@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/src/shared/components/ui/select"
 import { useToast } from "@/src/shared/hook/use-toast"
 
 export default function ConsultorQuotationDetailPage({ params }: { params: { id: string } }) {

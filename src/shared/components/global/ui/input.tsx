@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { cn } from "@/src/shared/utils/index";
+import { cn } from "@/src/shared/lib/utils";
 
 export interface InputProps extends React.ComponentProps<"input"> {
   error?: boolean;

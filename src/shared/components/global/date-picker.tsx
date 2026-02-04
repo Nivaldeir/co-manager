@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react"
 import { Calendar } from "lucide-react"
-import { cn } from "@/src/shared/utils"
+import { cn } from "@/src/shared/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/src/shared/components/global/ui/popover"
 import { Button } from "@/src/shared/components/global/ui/button"
 

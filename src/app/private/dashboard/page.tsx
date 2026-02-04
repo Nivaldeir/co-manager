@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/src/shared/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
 import { BarChart3, Plus, Workflow, TrendingUp, Clock, CheckCircle } from 'lucide-react'
 
 export default function DashboardPage() {

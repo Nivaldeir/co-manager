@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/src/shared/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
+import { Badge } from '@/src/shared/components/ui/badge'
+import { Input } from '@/src/shared/components/ui/input'
 import { Workflow, Search, Filter, Calendar, TrendingUp, Building2, Flag, Eye } from 'lucide-react'
 import {
   Select,
@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/src/shared/components/ui/select"
 
 export default function ConsultorPage() {
   const [searchTerm, setSearchTerm] = useState('')
