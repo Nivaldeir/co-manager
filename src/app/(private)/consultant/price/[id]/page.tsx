@@ -96,12 +96,10 @@ export default function ConsultorQuotationDetailPage({ params }: { params: { id:
               <span className="text-muted-foreground hidden sm:inline">|</span>
               <span className="text-sm text-muted-foreground hidden sm:inline">Análise de Cotação</span>
             </div>
-            <Button variant="ghost" asChild>
-              <Link href="/consultor">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar
-              </Link>
-            </Button>
+            <Link href="/consultor">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Link>
           </div>
         </div>
       </header>

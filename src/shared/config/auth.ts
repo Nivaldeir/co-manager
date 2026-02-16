@@ -1,8 +1,5 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { Fetch } from "@/src/shared/lib/utils/fetch";
-
-const fetch = new Fetch({ requireAuth: false });
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -18,48 +15,86 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Email e senha são obrigatórios");
         }
 
-        try {
-          const response = await fetch.post<any>(`/v2/auth/app/session`, {
-            email: credentials.email,
-            password: credentials.password,
-            code: credentials.code,
+        // Modo de desenvolvimento: permite login direto com usuários do seed
+        const isDevelopment = process.env.NODE_ENV === 'development';
+        const devEmails = ['user@example.com', 'analista@example.com', 'admin@example.com'];
+        
+        if (isDevelopment && devEmails.includes(credentials.email) && credentials.password === 'dev123') {
+          // Buscar usuário no banco Prisma
+          const { prisma } = await import('@/src/server/lib/prisma');
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email }
           });
-          console.log(response);
-          
-          const isSuccess = response.ok === true || response.success === true;
-          if (!isSuccess) {
-            throw new Error(response.message || "Erro ao fazer login");
+
+          if (user) {
+            return {
+              id: user.id,
+              name: user.name || '',
+              email: user.email,
+              role: user.role,
+              token: 'dev-token-' + user.id,
+            };
           }
-
-          const userData = response.user || response.data?.user;
-          const token = response.token || response.data?.token;
-
-          if (!userData || !token) {
-            throw new Error("Dados do usuário ou token não encontrados na resposta");
-          }
-
-          return {
-            id: userData.id || userData.userId?.toString() || "",
-            name: userData.name || "",
-            email: userData.email || "",
-            status: userData.status,
-            docStatus: userData.doc_status || userData.docStatus,
-            cnpj: userData.cnpj || null,
-            companyName: userData.company_name || userData.companyName || null,
-            tradeName: userData.trade_name || userData.tradeName || null,
-            partnerName: userData.partner_name || userData.partnerName || null,
-            role: userData.role || null,
-            token: token,
-          };
-        } catch (error) {
-          console.error("Auth error:", error);
-
-          if (error instanceof Error) {
-            throw error;
-          }
-
-          throw new Error("Erro desconhecido ao fazer login");
         }
+
+        // Autenticação via API externa (produção)
+        // Se não estiver em desenvolvimento e não for usuário do seed, tenta API externa
+        const apiBackend = process.env.API_BACKEND;
+        
+        if (apiBackend) {
+          try {
+            const response = await fetch(`${apiBackend}/v2/auth/app/session`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email: credentials.email,
+                password: credentials.password,
+                code: credentials.code,
+              }),
+            });
+
+            const data = await response.json();
+            
+            const isSuccess = data.ok === true || data.success === true || response.ok;
+            if (!isSuccess) {
+              throw new Error(data.message || "Erro ao fazer login");
+            }
+
+            const userData = data.user || data.data?.user;
+            const token = data.token || data.data?.token;
+
+            if (!userData || !token) {
+              throw new Error("Dados do usuário ou token não encontrados na resposta");
+            }
+
+            return {
+              id: userData.id || userData.userId?.toString() || "",
+              name: userData.name || "",
+              email: userData.email || "",
+              status: userData.status,
+              docStatus: userData.doc_status || userData.docStatus,
+              cnpj: userData.cnpj || null,
+              companyName: userData.company_name || userData.companyName || null,
+              tradeName: userData.trade_name || userData.tradeName || null,
+              partnerName: userData.partner_name || userData.partnerName || null,
+              role: userData.role || null,
+              token: token,
+            };
+          } catch (error) {
+            console.error("Auth error:", error);
+
+            if (error instanceof Error) {
+              throw error;
+            }
+
+            throw new Error("Erro desconhecido ao fazer login");
+          }
+        }
+
+        // Se não houver API_BACKEND configurado e não for usuário do seed, retorna erro
+        throw new Error("Credenciais inválidas ou API de autenticação não configurada");
       },
     }),
   ],
@@ -106,6 +141,6 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 60 * 60
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development-only-change-in-production',
 };
 

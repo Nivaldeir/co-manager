@@ -1,42 +1,49 @@
+'use client'
+
 import Link from 'next/link'
+import { useSession, signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { Button } from '@/src/shared/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
-import { BarChart3, Plus, Workflow, TrendingUp, Clock, CheckCircle } from 'lucide-react'
+import { BarChart3, Plus, Workflow, TrendingUp, Clock, CheckCircle, LogOut } from 'lucide-react'
+import { api } from '@/src/shared/providers/trpc-provider'
 
 export default function DashboardPage() {
-  const quotations = [
-    {
-      id: 1,
-      title: 'Automação de Faturamento',
-      status: 'Em Análise',
-      requestDate: '2024-01-15',
-      estimatedROI: '85%',
-      priority: 'Alta'
-    },
-    {
-      id: 2,
-      title: 'Processamento de Pedidos',
-      status: 'Aprovado',
-      requestDate: '2024-01-10',
-      estimatedROI: '70%',
-      priority: 'Média'
-    },
-    {
-      id: 3,
-      title: 'Cadastro de Clientes',
-      status: 'Em Desenvolvimento',
-      requestDate: '2024-01-05',
-      estimatedROI: '92%',
-      priority: 'Alta'
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const quotationsQuery = api.quotations.getAll.useQuery(undefined, {
+    enabled: status === 'authenticated',
+  })
+
+  // Redirecionar se não autenticado
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin?callbackUrl=/dashboard')
     }
-  ]
+  }, [status, router])
+
+  const quotations = quotationsQuery.data || []
+
+  // Calcular estatísticas
+  const totalQuotations = quotations.length
+  const inReview = quotations.filter(q => q.status === 'in_review' || q.status === 'draft').length
+  const completed = quotations.filter(q => q.status === 'approved').length
 
   const stats = [
-    { label: 'Total de Cotações', value: '12', icon: Workflow, color: 'text-primary' },
-    { label: 'ROI Médio', value: '82%', icon: TrendingUp, color: 'text-secondary' },
-    { label: 'Em Análise', value: '5', icon: Clock, color: 'text-chart-3' },
-    { label: 'Concluídas', value: '7', icon: CheckCircle, color: 'text-chart-4' }
+    { label: 'Total de Cotações', value: totalQuotations.toString(), icon: Workflow, color: 'text-primary' },
+    { label: 'Em Análise', value: inReview.toString(), icon: Clock, color: 'text-chart-3' },
+    { label: 'Concluídas', value: completed.toString(), icon: CheckCircle, color: 'text-chart-4' },
+    { label: 'Rascunhos', value: quotations.filter(q => q.status === 'draft').length.toString(), icon: TrendingUp, color: 'text-secondary' }
   ]
+
+  if (status === 'loading' || quotationsQuery.isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,17 +61,19 @@ export default function DashboardPage() {
               <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Home
               </Link>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/dashboard/analytics">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Analytics
-                </Link>
-              </Button>
               <Button asChild>
                 <Link href="/dashboard/new-quotation">
                   <Plus className="h-4 w-4 mr-2" />
                   Nova Cotação
                 </Link>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
               </Button>
             </nav>
           </div>
@@ -127,16 +136,16 @@ export default function DashboardPage() {
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                          <span>Status: {quotation.status}</span>
+                          <span>Status: {quotation.status === 'draft' ? 'Rascunho' : quotation.status === 'in_review' ? 'Em Análise' : quotation.status === 'approved' ? 'Aprovado' : quotation.status}</span>
                           <span>•</span>
-                          <span>Data: {new Date(quotation.requestDate).toLocaleDateString('pt-BR')}</span>
+                          <span>Data: {new Date(quotation.createdAt).toLocaleDateString('pt-BR')}</span>
                           <span>•</span>
-                          <span>ROI Estimado: {quotation.estimatedROI}</span>
+                          <span>Prioridade: {quotation.priority}</span>
                         </div>
                       </div>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" asChild>
-                          <Link href={`/dashboard/quotation/${quotation.id}`}>
+                          <Link href={`/dashboard/quotations/${quotation.id}`}>
                             <BarChart3 className="h-4 w-4 mr-2" />
                             Ver Detalhes
                           </Link>
@@ -149,7 +158,7 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-
+        <div  className='mt-4'/>
         {/* Empty State (shown when no quotations) */}
         {quotations.length === 0 && (
           <Card>

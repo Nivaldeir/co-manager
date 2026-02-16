@@ -1,0 +1,220 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Usuários do sistema
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  role      String   @default("user") // user, analista, admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relações
+  quotations       Quotation[]
+  cardTemplates    CardTemplate[]
+  flowNodes        FlowNode[]
+  quotationReplies QuotationReply[]
+
+  @@index([role])
+  @@index([email])
+  @@map("users")
+}
+
+// Cotações/Automações
+model Quotation {
+  id               String  @id @default(cuid())
+  title            String
+  description      String?
+  department       String
+  priority         String // baixa, media, alta, critica
+  estimatedVolume  String?
+  currentProcess   String?
+  expectedBenefits String?
+  status           String  @default("draft") // draft, submitted, in_review, approved, rejected
+  estimatedROI     Float?
+  estimatedCost    Float?
+  estimatedTime    String?
+
+  // Relações
+  userId   String
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asIsFlow FlowNode[]         @relation("AsIsFlow")
+  toBeFlow FlowNode[]         @relation("ToBeFlow")
+  replies  QuotationReply[]
+  analysis QuotationAnalysis?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("quotations")
+}
+
+// Templates de Cards customizáveis
+model CardTemplate {
+  id          String  @id @default(cuid())
+  name        String
+  label       String // Nome exibido (ex: "Gatilho", "Ação")
+  description String?
+  icon        String // Nome do ícone do lucide-react
+  color       String // Classe de cor do gradiente (ex: "from-emerald-500 to-teal-500")
+  category    String  @default("custom") // custom, system
+  isActive    Boolean @default(true)
+
+  // Campos customizados do template
+  customFields Json? // Array de campos customizados
+
+  // Relações
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([category])
+  @@map("card_templates")
+}
+
+// Nós do fluxo (etapas)
+model FlowNode {
+  id           String  @id @default(cuid())
+  title        String // Nome da etapa (label)
+  description  String? // Descrição detalhada da etapa
+  type         String // start, agent, decision, end, trigger, action, condition, data, integration, custom
+  customTypeId String? // ID do CardTemplate se for tipo customizado
+
+  // Posição no canvas (React Flow)
+  positionX Float
+  positionY Float
+
+  // ID do nó no React Flow (para mapeamento)
+  reactFlowId String? // ID usado no React Flow (pode ser diferente do id do banco)
+
+  // Campos adicionais para análise
+  estimatedTime  String?
+  peopleInvolved String?
+  frequency      String?
+  complexity     String? // baixa, media, alta
+  systems        String?
+  errors         String?
+  cost           String?
+
+  // Metadados adicionais (opções de decisão, etc)
+  metadata Json? // Para armazenar options de DecisionNode, etc
+
+  // Relações
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Conexões (self-relation)
+  connections   FlowNodeConnection[] @relation("FromNode")
+  connectedFrom FlowNodeConnection[] @relation("ToNode")
+
+  // Fluxos AS-IS e TO-BE
+  asIsQuotationId String?
+  asIsQuotation   Quotation? @relation("AsIsFlow", fields: [asIsQuotationId], references: [id], onDelete: Cascade)
+
+  toBeQuotationId String?
+  toBeQuotation   Quotation? @relation("ToBeFlow", fields: [toBeQuotationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([asIsQuotationId])
+  @@index([toBeQuotationId])
+  @@index([type])
+  @@index([reactFlowId])
+  @@map("flow_nodes")
+}
+
+// Conexões entre nós (edges do React Flow)
+model FlowNodeConnection {
+  id         String   @id @default(cuid())
+  fromNodeId String
+  fromNode   FlowNode @relation("FromNode", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  toNodeId   String
+  toNode     FlowNode @relation("ToNode", fields: [toNodeId], references: [id], onDelete: Cascade)
+
+  // IDs do React Flow (para mapeamento)
+  sourceHandle String? // ID do handle de origem (ex: "start-out", "option1")
+  targetHandle String? // ID do handle de destino (ex: "agent-in", "decision-in")
+
+  // Metadados da conexão
+  label     String?
+  condition String? // Condição da conexão (ex: "sim", "não", "aprovado")
+
+  // Metadados adicionais do React Flow
+  metadata Json? // Para armazenar dados adicionais da edge
+
+  createdAt DateTime @default(now())
+
+  @@unique([fromNodeId, toNodeId, sourceHandle, targetHandle])
+  @@index([fromNodeId])
+  @@index([toNodeId])
+  @@map("flow_node_connections")
+}
+
+// Análises e cálculos de ROI
+model QuotationAnalysis {
+  id          String    @id @default(cuid())
+  quotationId String    @unique
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  // Métricas calculadas
+  totalSteps        Int     @default(0)
+  totalConnections  Int     @default(0)
+  averageComplexity String?
+  estimatedSavings  Float?
+  estimatedROI      Float?
+  estimatedCost     Float?
+  timeReduction     Float? // Percentual de redução de tempo
+
+  // Análise detalhada
+  analysisData Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("quotation_analyses")
+}
+
+// Respostas/Comentários de Admin nas Cotações
+model QuotationReply {
+  id          String    @id @default(cuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  // Autor da resposta
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Conteúdo
+  message    String // Mensagem da resposta
+  isInternal Boolean @default(false) // Se é nota interna (não visível para o cliente)
+
+  // Status da resposta
+  status String? // pending, sent, read
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([quotationId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("quotation_replies")
+}

@@ -1,7 +1,6 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "./context";
 import superjson from "superjson";
-import { Fetch } from "@/src/shared/lib/utils/fetch";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
@@ -9,21 +8,12 @@ const t = initTRPC.context<Context>().create({
 
 export const router = t.router;
 
-export const publicProcedure = t.procedure.use(({ next, ctx }) => {
-  return next({
-    ctx: {
-      ...ctx,
-      api: new Fetch({
-        baseUrl: process.env.API_BACKEND,
-        requireAuth: false,
-      }),
-    },
-  });
-});
+export const publicProcedure = t.procedure;
 
 const isAuthenticated = t.middleware(({ ctx, next, path }) => {
-  if (!ctx.token && path !== "customer.signIn") {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Token de autenticação não fornecido" });
+  // Verificar se há sessão do NextAuth (para uso com Prisma)
+  if (!ctx.session?.user?.id) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Usuário não autenticado" });
   }
   
   return next({
@@ -31,11 +21,7 @@ const isAuthenticated = t.middleware(({ ctx, next, path }) => {
       ...ctx,
       session: ctx.session,
       token: ctx.token,
-      api: new Fetch({
-        baseUrl: process.env.API_BACKEND,
-        token: ctx.token,
-        requireAuth: true
-      }),
+      userId: ctx.session.user.id,
     },
   });
 });
