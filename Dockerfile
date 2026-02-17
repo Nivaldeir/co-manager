@@ -8,6 +8,8 @@ RUN npm ci --frozen-lockfile
 
 COPY . .
 
+RUN npx prisma generate
+
 RUN npm run build
 
 EXPOSE 3000
